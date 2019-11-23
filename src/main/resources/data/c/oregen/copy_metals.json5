@@ -21,7 +21,7 @@
 		},
 
 		"copper": {
-			"dimensions": [ "minecraft:overworld" ],
+			"dimensions": [ { "tag": "overworlds" } ],
 			"biomes": [ "*" ],
 
 			"ore_block": "c:copper_ore",
@@ -155,7 +155,6 @@
 			"minecraft:end_stone": "c:cobalt_end_ore"
 		},
 		"copper": {
-			"#minecraft:natural_stone": "c:copper_ore",
 			"minecraft:netherrack": "c:copper_nether_ore",
 			"minecraft:end_stone": "c:copper_end_ore"
 		},

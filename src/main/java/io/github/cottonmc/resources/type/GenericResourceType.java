@@ -1,8 +1,11 @@
 package io.github.cottonmc.resources.type;
 
 import io.github.cottonmc.resources.CottonResources;
+import io.github.cottonmc.resources.LayeredOreBlock;
 import io.github.cottonmc.resources.common.CommonRegistry;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.minecraft.block.Block;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
@@ -89,6 +92,10 @@ public class GenericResourceType implements ResourceType {
 		}
 
 		Block resultBlock = blockSupplier.get();
+		if (resultBlock instanceof LayeredOreBlock){
+			BlockRenderLayerMap.INSTANCE.putBlock(resultBlock, RenderLayer.getCutoutMipped());
+		}
+
 		BlockItem resultItem =  new BlockItem(resultBlock, new Item.Settings().group(CottonResources.ITEM_GROUP)); //Shouldn't be necessary, but is?
 
 		return CommonRegistry.register(blockName, resultBlock, resultItem);

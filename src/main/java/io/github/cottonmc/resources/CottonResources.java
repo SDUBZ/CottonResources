@@ -1,6 +1,8 @@
 package io.github.cottonmc.resources;
 
+import com.mojang.brigadier.tree.RootCommandNode;
 import io.github.cottonmc.jankson.JanksonFactory;
+import io.github.cottonmc.resources.command.BiomeTagTestCommand;
 import io.github.cottonmc.resources.command.StripCommand;
 import io.github.cottonmc.resources.config.CottonResourcesConfig;
 import io.github.cottonmc.resources.oregen.BiomeSpec;
@@ -15,13 +17,19 @@ import io.github.cottonmc.resources.type.GenericResourceType;
 import io.github.cottonmc.resources.type.MetalResourceType;
 import io.github.cottonmc.resources.type.RadioactiveResourceType;
 import io.github.cottonmc.resources.type.ResourceType;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.fabricmc.fabric.api.registry.CommandRegistry;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.CommandManager;
@@ -134,14 +142,23 @@ public class CottonResources implements ModInitializer {
 		ResourceManagerHelper.get(net.minecraft.resource.ResourceType.SERVER_DATA).registerReloadListener(new OregenResourceListener());
 		ResourceManagerHelper.get(net.minecraft.resource.ResourceType.SERVER_DATA).registerReloadListener(new WorldTagReloadListener());
 		
-		CommandRegistry.INSTANCE.register(false, (dispatcher)->{
+		CommandRegistry.INSTANCE.register(false, (dispatcher) -> {
+			RootCommandNode<ServerCommandSource> rootCommandNode = dispatcher.getRoot();
+
 			LiteralCommandNode<ServerCommandSource> stripCommandNode = CommandManager.literal("strip")
 					.executes(new StripCommand())
 					.requires((source)->source.hasPermissionLevel(3))
 					.build();
 			
-			dispatcher.getRoot().addChild(stripCommandNode);
-		});
+			rootCommandNode.addChild(stripCommandNode);
+
+			LiteralCommandNode<ServerCommandSource> biomeTagTestNode = CommandManager.literal("biometag")
+					.executes(new BiomeTagTestCommand())
+					.requires((source)->source.hasPermissionLevel(3))
+					.build();
+
+			rootCommandNode.addChild(biomeTagTestNode);
+			});
 		
 		File file = new File(FabricLoader.getInstance().getConfigDirectory(),"CottonResources.json5");
 		if (file.exists()) {
@@ -160,6 +177,29 @@ public class CottonResources implements ModInitializer {
 	
 	private static void setupBiomeGenerator(Biome biome) {
 		biome.addFeature(GenerationStep.Feature.UNDERGROUND_ORES,
+			CottonOreFeature.COTTON_ORE
+					.configure(FeatureConfig.DEFAULT)
+					.createDecoratedFeature(
+							Decorator.COUNT_RANGE.configure(new RangeDecoratorConfig(1, 0, 0, 256)
+					)
+					));
+				//FeatureConfig.DEFAULT,
+				//Decorator.COUNT_RANGE,
+				//new RangeDecoratorConfig(1, 0, 0, 256)
+		//);
+		/*
+		biome.addFeature(
+		Feature.UNDERGROUND_ORES,
+		net.minecraft.world.gen.feature.Feature.ORE
+			.configure(
+				new OreFeatureConfig(Target.NATURAL_STONE, GRAVEL, 33))
+				.createDecoratedFeature(
+					Decorator.COUNT_RANGE.configure(
+						new RangeDecoratorConfig(8, 0, 0, 256))));
+		*/
+
+		/*
+				biome.addFeature(GenerationStep.Feature.UNDERGROUND_ORES,
 			Biome.configureFeature(
 				CottonOreFeature.COTTON_ORE,
 				FeatureConfig.DEFAULT,
@@ -167,6 +207,7 @@ public class CottonResources implements ModInitializer {
 				new RangeDecoratorConfig(1, 0, 0, 256)
 			)
 		);
+		 */
 	}
 
 	private static MetalResourceType builtinMetal(String id, Supplier<Block> oreSupplier, String... extraAffixes) {
