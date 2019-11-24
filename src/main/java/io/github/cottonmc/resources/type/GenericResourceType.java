@@ -3,7 +3,10 @@ package io.github.cottonmc.resources.type;
 import io.github.cottonmc.resources.CottonResources;
 import io.github.cottonmc.resources.LayeredOreBlock;
 import io.github.cottonmc.resources.common.CommonRegistry;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.item.BlockItem;
@@ -92,8 +95,9 @@ public class GenericResourceType implements ResourceType {
 		}
 
 		Block resultBlock = blockSupplier.get();
-		if (resultBlock instanceof LayeredOreBlock){
-			BlockRenderLayerMap.INSTANCE.putBlock(resultBlock, RenderLayer.getCutoutMipped());
+
+		if (resultBlock instanceof LayeredOreBlock && FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT){
+			handleMipped(resultBlock);
 		}
 
 		BlockItem resultItem =  new BlockItem(resultBlock, new Item.Settings().group(CottonResources.ITEM_GROUP)); //Shouldn't be necessary, but is?
@@ -121,5 +125,10 @@ public class GenericResourceType implements ResourceType {
 		for (String affix : itemAffixes) {
 			registerItem(getFullNameForAffix(affix));
 		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	private static void handleMipped(Block block) {
+		BlockRenderLayerMap.INSTANCE.putBlock(block, RenderLayer.getCutoutMipped());
 	}
 }

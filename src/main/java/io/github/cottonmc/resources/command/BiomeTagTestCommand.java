@@ -5,15 +5,14 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.github.cottonmc.resources.tag.BiomeTags;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.LiteralText;
 
 public class BiomeTagTestCommand implements Command<ServerCommandSource> {
 
     @Override
     public int run(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        ServerPlayerEntity player = context.getSource().getPlayer();
-        System.out.println(BiomeTags.CONTAINER.getEntries().size());
-        BiomeTags.CONTAINER.getEntries().forEach((a,b)->System.err.println(a + ":" + b));
+        context.getSource().sendFeedback(new LiteralText("Tags: "), false);
+        BiomeTags.getContainer().getKeys().forEach(key -> context.getSource().sendFeedback(new LiteralText(key.toString()), false));
         return 1;
     }
 }

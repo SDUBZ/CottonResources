@@ -44,24 +44,17 @@ public class CottonOreFeature extends Feature<DefaultFeatureConfig> {
 		OreVoteConfig config = OregenResourceListener.getConfig();
 		if (config.ores.isEmpty()) return true; // We didn't generate anything, but yes, don't retry.
 		
-		
 		Chunk toGenerateIn = world.getChunk(pos);
 		Biome biome = toGenerateIn.getBiomeArray().getStoredBiome(pos.getX(),pos.getY(), pos.getZ());
-		System.out.println("Generating into "+toGenerateIn.getPos()+" <- "+config.ores);
+		//System.out.println("Generating into "+toGenerateIn.getPos()+" <- "+config.ores);
 		for(String s : config.ores) {
 			OreGenerationSettings settings = config.generators.get(s);
 			if (settings==null) continue;
 
-			// TODO: Issue occurs with biomespec
-
-			System.out.println("Dim:" + settings.dimensions.test(world.getDimension()));
-			System.out.println("Biome:" + settings.biomes.test(biome));
-
 			if (settings.dimensions.test(world.getDimension()) && settings.biomes.test(biome)) {
-				System.out.println("Test passes");
 				//For now, spit debug info
 				if (settings.ores.isEmpty()) {
-					System.out.println("Empty ore settings -- ERROR");
+					//System.out.println("Empty ore settings");
 					continue;
 				}
 				int clusters = settings.cluster_count;
@@ -80,7 +73,7 @@ public class CottonOreFeature extends Feature<DefaultFeatureConfig> {
 					for(int j=0; j<SPHERES.length; j++) { //find the smallest clump in our vocabulary which expresses the number of ores
 						Clump clump = SPHERES[j];
 						if (clump.size()>=settings.cluster_size) {
-							System.out.println("Cluster size "+settings.cluster_size+" matched against clump #"+j);
+							//System.out.println("Cluster size "+settings.cluster_size+" matched against clump #"+j);
 							radius = j+1;
 							break;
 						}
@@ -96,12 +89,12 @@ public class CottonOreFeature extends Feature<DefaultFeatureConfig> {
 					
 					int generatedThisCluster = generateVeinPartGaussianClump(s, world, clusterX, clusterY, clusterZ, settings.cluster_size, radius, settings.ores, 85, rand);
 					blocksGenerated += generatedThisCluster;
-					System.out.println("    Generated "+generatedThisCluster+" out of "+settings.cluster_size+" expected.");
+					//System.out.println("    Generated "+generatedThisCluster+" out of "+settings.cluster_size+" expected.");
 				}
 				
-				System.out.println("    Generated "+blocksGenerated+" in "+clusters+" clusters out of "+settings.cluster_size+"*"+clusters+"="+(settings.cluster_size*clusters));
+				//System.out.println("    Generated "+blocksGenerated+" in "+clusters+" clusters out of "+settings.cluster_size+"*"+clusters+"="+(settings.cluster_size*clusters));
 			} else {
-				System.out.println("    skipping "+s+" here.");
+				//System.out.println("    skipping "+s+" here.");
 			}
 		}
 		
@@ -166,25 +159,17 @@ public class CottonOreFeature extends Feature<DefaultFeatureConfig> {
 	
 	protected int generateVeinPartGaussianClump(String resourceName, IWorld world, int x, int y, int z, int clumpSize, int radius, Set<BlockState> states, int density, Random rand) {
 		int radIndex = radius-1;
-		for (BlockState state : states) {
-			System.out.println(state.toString());
-		}
 		Clump clump = (radIndex<SPHERES.length) ? SPHERES[radIndex].copy() : Clump.of(radius);
-
-		System.out.println(clump.size());
 
 		//int rad2 = radius * radius;
 		BlockState[] blocks = states.toArray(new BlockState[states.size()]);
 		int replaced = 0;
 		for(int i=0; i<clump.size(); i++) {
 			if (clump.isEmpty()) break;
-			System.out.println("not empty");
 			BlockPos pos = clump.removeGaussian(rand, x, y, z);
 			if (replace(world, pos.getX(), pos.getY(), pos.getZ(), resourceName, blocks, rand)) {
 				replaced++;
 				if (replaced>=clumpSize) return replaced;
-			} else {
-				System.out.println("replacment failed");
 			}
 		}
 		
@@ -206,27 +191,21 @@ public class CottonOreFeature extends Feature<DefaultFeatureConfig> {
 		BlockState toReplace = world.getBlockState(pos);
 		HashMap<String, String> replacementSpecs = OregenResourceListener.getConfig().replacements.get(resource);
 		if (replacementSpecs!=null) {
-			System.out.println("Activating replacementSpecs for resource "+resource);
+			//System.out.println("Activating replacementSpecs for resource "+resource);
 			for(Map.Entry<String, String> entry : replacementSpecs.entrySet()) {
 				if (test(toReplace.getBlock(), entry.getKey())) {
-					System.out.println("Found matching pair.");
 					BlockState replacement = getBlockState(entry.getValue(), rand);
 					if (replacement==null) continue;
-					System.out.println("Pointer 11: Replacement BS is valid");
 					
 					world.setBlockState(pos, replacement, 3);
 					return true;
 				}
-				System.out.println("Testfailed");
 			}
 
-			System.out.println("All replacementSpecs failed to apply");
 			return false; //There are replacements defined for this resource, but none could be applied.
 		} else {
-			System.out.println("Null replacementspc");
 			if (!NATURAL_STONE.test(toReplace.getBlock())) return false; //Fixes surface copper
 
-			System.out.println("replacement was stone");
 			BlockState replacement = states[rand.nextInt(states.length)];
 			world.setBlockState(pos, replacement, 3);
 			return true;
@@ -234,8 +213,6 @@ public class CottonOreFeature extends Feature<DefaultFeatureConfig> {
 	}
 	
 	public boolean test(Block block, String spec) {
-		System.out.println(block.toString());
-		System.out.println(spec);
 		if (spec.startsWith("#")) {
 			Tag<Block> tag = BlockTags.getContainer().get(new Identifier(spec.substring(1)));
 			if (tag==null) return false;
