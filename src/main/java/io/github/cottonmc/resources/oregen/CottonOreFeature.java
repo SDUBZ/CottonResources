@@ -10,6 +10,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeArray;
 import net.minecraft.world.biome.StoneShoreBiome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
@@ -45,7 +46,15 @@ public class CottonOreFeature extends Feature<DefaultFeatureConfig> {
 		if (config.ores.isEmpty()) return true; // We didn't generate anything, but yes, don't retry.
 		
 		Chunk toGenerateIn = world.getChunk(pos);
-		Biome biome = toGenerateIn.getBiomeArray().getStoredBiome(pos.getX(),pos.getY(), pos.getZ());
+
+		BiomeArray biomeArray = toGenerateIn.getBiomeArray();
+
+		if (biomeArray==null) {
+			System.err.println("BiomeArray was null");
+			return false; // I have no idea why this would be null but in the context of generating a check I am pretty sure the game would have this already.
+		}
+
+		Biome biome = biomeArray.getStoredBiome(pos.getX(), pos.getY(), pos.getZ());
 		//System.out.println("Generating into "+toGenerateIn.getPos()+" <- "+config.ores);
 		for(String s : config.ores) {
 			OreGenerationSettings settings = config.generators.get(s);
@@ -177,7 +186,7 @@ public class CottonOreFeature extends Feature<DefaultFeatureConfig> {
 	}
 	
 	/**
-	 * 
+	 *
 	 * @param world
 	 * @param x
 	 * @param y
@@ -190,7 +199,7 @@ public class CottonOreFeature extends Feature<DefaultFeatureConfig> {
 		BlockPos pos = new BlockPos(x, y, z);
 		BlockState toReplace = world.getBlockState(pos);
 		HashMap<String, String> replacementSpecs = OregenResourceListener.getConfig().replacements.get(resource);
-		if (replacementSpecs!=null) {
+		if (replacementSpecs != null) {
 			//System.out.println("Activating replacementSpecs for resource "+resource);
 			for(Map.Entry<String, String> entry : replacementSpecs.entrySet()) {
 				if (test(toReplace.getBlock(), entry.getKey())) {
