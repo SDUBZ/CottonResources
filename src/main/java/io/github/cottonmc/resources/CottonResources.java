@@ -139,9 +139,9 @@ public class CottonResources implements ModInitializer {
 						RootCommandNode<ServerCommandSource> rootCommandNode = dispatcher.getRoot();
 
 						LiteralCommandNode<ServerCommandSource> stripCommandNode = CommandManager.literal("strip")
-								.executes(new StripCommand())
-								.requires((source) -> source.hasPermissionLevel(3))
-								.build();
+							.executes(new StripCommand())
+							.requires((source) -> source.hasPermissionLevel(3))
+							.build();
 
 						rootCommandNode.addChild(stripCommandNode);
 				});
@@ -163,12 +163,12 @@ public class CottonResources implements ModInitializer {
 
 		private static void setupBiomeGenerator(Biome biome) {
 				biome.addFeature(GenerationStep.Feature.UNDERGROUND_ORES,
-						CottonOreFeature.COTTON_ORE
-								.configure(FeatureConfig.DEFAULT)
-								.createDecoratedFeature(
-										Decorator.COUNT_RANGE.configure(new RangeDecoratorConfig(1, 0, 0, 256)
-										)
-								));
+					CottonOreFeature.COTTON_ORE
+						.configure(FeatureConfig.DEFAULT)
+						.createDecoratedFeature(
+							Decorator.COUNT_RANGE.configure(new RangeDecoratorConfig(1, 0, 0, 256)
+							)
+						));
 		}
 
 		private static MetalResourceType builtinMetal(String id, Supplier<Block> oreSupplier, String... extraAffixes) {
@@ -221,8 +221,8 @@ public class CottonResources implements ModInitializer {
 				File file = new File(FabricLoader.getInstance().getConfigDirectory(), "CottonResources.json5");
 
 				Jankson jankson = JanksonFactory.builder()
-						.registerTypeAdapter(OreGenerationSettings.class, OreGenerationSettings::deserialize)
-						.build();
+					.registerTypeAdapter(OreGenerationSettings.class, OreGenerationSettings::deserialize)
+					.build();
 				try {
 						JsonObject json = jankson.load(file);
 						System.out.println("Loading: " + json);
@@ -255,9 +255,9 @@ public class CottonResources implements ModInitializer {
 				File file = new File(FabricLoader.getInstance().getConfigDirectory(), "CottonResources.json5");
 
 				Jankson jankson = JanksonFactory.builder()
-						.registerSerializer(BiomeSpec.class, (spec, marshaller) -> TaggableSpec.serialize(spec))
-						.registerSerializer(DimensionSpec.class, (spec, marshaller) -> TaggableSpec.serialize(spec))
-						.build();
+					.registerSerializer(BiomeSpec.class, (spec, marshaller) -> TaggableSpec.serialize(spec))
+					.registerSerializer(DimensionSpec.class, (spec, marshaller) -> TaggableSpec.serialize(spec))
+					.build();
 
 				JsonElement json = jankson.toJson(config);
 
