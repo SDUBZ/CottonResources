@@ -59,219 +59,218 @@ import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.impl.SyntaxError;
 
 public class CottonResources implements ModInitializer {
-		public static final String COMMON = "c";
-		public static final String MODID = "cotton-resources";
-		public static final Logger LOGGER = LogManager.getLogger("CottonResources", new PrefixMessageFactory("CottonResources"));
-		public static CottonResourcesConfig CONFIG = new CottonResourcesConfig(); //ConfigManager.loadConfig(CottonResourcesConfig.class);
-		private static final String[] MACHINE_AFFIXES = new String[]{"gear", "plate"};
-		public static final Map<String, ResourceType> BUILTINS = new HashMap<>();
+	public static final String COMMON = "c";
+	public static final String MODID = "cotton-resources";
+	public static final Logger LOGGER = LogManager.getLogger("CottonResources", new PrefixMessageFactory("CottonResources"));
+	public static CottonResourcesConfig CONFIG = new CottonResourcesConfig(); //ConfigManager.loadConfig(CottonResourcesConfig.class);
+	private static final String[] MACHINE_AFFIXES = new String[]{"gear", "plate"};
+	public static final Map<String, ResourceType> BUILTINS = new HashMap<>();
 
-		public static ItemGroup ITEM_GROUP = FabricItemGroupBuilder.build(new Identifier(MODID, "resources"), () -> new ItemStack(BUILTINS.get("copper").getItem("gear")));
+	public static ItemGroup ITEM_GROUP = FabricItemGroupBuilder.build(new Identifier(MODID, "resources"), () -> new ItemStack(BUILTINS.get("copper").getItem("gear")));
 
-		public static SoundEvent METAL_STEP_SOUND;
-		public static BlockSoundGroup METAL_SOUND_GROUP;
+	public static SoundEvent METAL_STEP_SOUND;
+	public static BlockSoundGroup METAL_SOUND_GROUP;
 
-		@Override
-		public void onInitialize() {
+	@Override
+	public void onInitialize() {
 
+		METAL_STEP_SOUND = Registry.register(Registry.SOUND_EVENT, "block.cotton-resources.metal.step", new SoundEvent(new Identifier("c:block.cotton-resources.metal.step")));
+		METAL_SOUND_GROUP = new BlockSoundGroup(1.0F, 1.5F, SoundEvents.BLOCK_METAL_BREAK, METAL_STEP_SOUND, SoundEvents.BLOCK_METAL_PLACE, SoundEvents.BLOCK_METAL_HIT, SoundEvents.BLOCK_METAL_FALL);
 
-				METAL_STEP_SOUND = Registry.register(Registry.SOUND_EVENT, "block.cotton-resources.metal.step", new SoundEvent(new Identifier("c:block.cotton-resources.metal.step")));
-				METAL_SOUND_GROUP = new BlockSoundGroup(1.0F, 1.5F, SoundEvents.BLOCK_METAL_BREAK, METAL_STEP_SOUND, SoundEvents.BLOCK_METAL_PLACE, SoundEvents.BLOCK_METAL_HIT, SoundEvents.BLOCK_METAL_FALL);
+		builtinMetal("copper", BlockSuppliers.STONE_TIER_ORE, MACHINE_AFFIXES);
+		builtinMetal("silver", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
+		builtinMetal("lead", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
+		builtinMetal("zinc", BlockSuppliers.STONE_TIER_ORE, MACHINE_AFFIXES);
+		builtinMetal("aluminum", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
+		MetalResourceType cobalt = builtinMetal("cobalt", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
+		//cobalt.withBlockAffix("nether_ore", BlockSuppliers.IRON_TIER_ORE);
 
-				builtinMetal("copper", BlockSuppliers.STONE_TIER_ORE, MACHINE_AFFIXES);
-				builtinMetal("silver", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
-				builtinMetal("lead", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
-				builtinMetal("zinc", BlockSuppliers.STONE_TIER_ORE, MACHINE_AFFIXES);
-				builtinMetal("aluminum", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
-				MetalResourceType cobalt = builtinMetal("cobalt", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
-				//cobalt.withBlockAffix("nether_ore", BlockSuppliers.IRON_TIER_ORE);
+		builtinMetal("tin", BlockSuppliers.STONE_TIER_ORE, MACHINE_AFFIXES);
+		builtinMetal("titanium", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
+		builtinMetal("tungsten", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
 
-				builtinMetal("tin", BlockSuppliers.STONE_TIER_ORE, MACHINE_AFFIXES);
-				builtinMetal("titanium", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
-				builtinMetal("tungsten", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
+		builtinMetal("platinum", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
+		builtinMetal("palladium", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
+		builtinMetal("osmium", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
+		builtinMetal("iridium", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
 
-				builtinMetal("platinum", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
-				builtinMetal("palladium", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
-				builtinMetal("osmium", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
-				builtinMetal("iridium", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
+		builtinMetal("steel", null, MACHINE_AFFIXES);
+		builtinMetal("brass", null, MACHINE_AFFIXES);
+		builtinMetal("electrum", null, MACHINE_AFFIXES);
 
-				builtinMetal("steel", null, MACHINE_AFFIXES);
-				builtinMetal("brass", null, MACHINE_AFFIXES);
-				builtinMetal("electrum", null, MACHINE_AFFIXES);
+		builtinItem("coal", "dust");
+		BUILTINS.put("coal_coke", new GenericResourceType("coal_coke").withBlockAffix("block", BlockSuppliers.COAL_BLOCK).withItemAffixes(""));
+		builtinItem("mercury");
 
-				builtinItem("coal", "dust");
-				BUILTINS.put("coal_coke", new GenericResourceType("coal_coke").withBlockAffix("block", BlockSuppliers.COAL_BLOCK).withItemAffixes(""));
-				builtinItem("mercury");
+		builtinItem("wood", "gear");
+		builtinItem("stone", "gear");
+		builtinItem("iron", "gear", "plate", "dust");
+		builtinItem("gold", "gear", "plate", "dust");
 
-				builtinItem("wood", "gear");
-				builtinItem("stone", "gear");
-				builtinItem("iron", "gear", "plate", "dust");
-				builtinItem("gold", "gear", "plate", "dust");
+		//These might get rods or molten capsules. They'd just need to be added to the end.
+		RadioactiveResourceType uranium = builtinRadioactive("uranium", null, "gear", "plate", "ingot", "nugget");
+		uranium.withBlockAffix("ore", BlockSuppliers.RADIOACTIVE_DIAMOND_TIER_ORE);
+		uranium.withBlockAffix("nether_ore", BlockSuppliers.RADIOACTIVE_DIAMOND_TIER_ORE);
+		uranium.withBlockAffix("end_ore", BlockSuppliers.RADIOACTIVE_DIAMOND_TIER_ORE);
+		builtinRadioactive("plutonium", null, "gear", "plate", "ingot", "nugget");
+		builtinRadioactive("thorium", null, "gear", "plate", "ingot", "nugget");
 
-				//These might get rods or molten capsules. They'd just need to be added to the end.
-				RadioactiveResourceType uranium = builtinRadioactive("uranium", null, "gear", "plate", "ingot", "nugget");
-				uranium.withBlockAffix("ore", BlockSuppliers.RADIOACTIVE_DIAMOND_TIER_ORE);
-				uranium.withBlockAffix("nether_ore", BlockSuppliers.RADIOACTIVE_DIAMOND_TIER_ORE);
-				uranium.withBlockAffix("end_ore", BlockSuppliers.RADIOACTIVE_DIAMOND_TIER_ORE);
-				builtinRadioactive("plutonium", null, "gear", "plate", "ingot", "nugget");
-				builtinRadioactive("thorium", null, "gear", "plate", "ingot", "nugget");
+		builtinItem("diamond", "gear", "plate", "dust");
+		builtinItem("emerald", "gear", "plate", "dust");
 
-				builtinItem("diamond", "gear", "plate", "dust");
-				builtinItem("emerald", "gear", "plate", "dust");
+		builtinGem("ruby", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
+		builtinGem("topaz", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
+		builtinGem("amethyst", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
+		builtinGem("peridot", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
+		builtinGem("sapphire", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
 
-				builtinGem("ruby", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
-				builtinGem("topaz", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
-				builtinGem("amethyst", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
-				builtinGem("peridot", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
-				builtinGem("sapphire", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
-
-				for (ResourceType resource : BUILTINS.values()) {
-						resource.registerAll();
-				}
-
-				setupBiomeGenerators(); //add cotton-resources ores to all current biomes
-				RegistryEntryAddedCallback.event(Registry.BIOME).register((id, ident, biome) -> setupBiomeGenerator(biome)); //Add cotton-resources ores to any later biomes that appear
-
-				ResourceManagerHelper.get(net.minecraft.resource.ResourceType.SERVER_DATA).registerReloadListener(new OregenResourceListener());
-				ResourceManagerHelper.get(net.minecraft.resource.ResourceType.SERVER_DATA).registerReloadListener(new WorldTagReloadListener());
-
-				CommandRegistry.INSTANCE.register(false, (dispatcher) -> {
-						RootCommandNode<ServerCommandSource> rootCommandNode = dispatcher.getRoot();
-
-						LiteralCommandNode<ServerCommandSource> stripCommandNode = CommandManager.literal("strip")
-							.executes(new StripCommand())
-							.requires((source) -> source.hasPermissionLevel(3))
-							.build();
-
-						rootCommandNode.addChild(stripCommandNode);
-				});
-
-				File file = new File(FabricLoader.getInstance().getConfigDirectory(), "CottonResources.json5");
-				if (file.exists()) {
-						CONFIG = loadConfig();
-						saveConfig(CONFIG);
-				} else {
-						saveConfig(CONFIG);
-				}
+		for (ResourceType resource : BUILTINS.values()) {
+			resource.registerAll();
 		}
 
-		private static void setupBiomeGenerators() {
-				for (Biome biome : Registry.BIOME) {
-						setupBiomeGenerator(biome);
+		setupBiomeGenerators(); //add cotton-resources ores to all current biomes
+		RegistryEntryAddedCallback.event(Registry.BIOME).register((id, ident, biome) -> setupBiomeGenerator(biome)); //Add cotton-resources ores to any later biomes that appear
+
+		ResourceManagerHelper.get(net.minecraft.resource.ResourceType.SERVER_DATA).registerReloadListener(new OregenResourceListener());
+		ResourceManagerHelper.get(net.minecraft.resource.ResourceType.SERVER_DATA).registerReloadListener(new WorldTagReloadListener());
+
+		CommandRegistry.INSTANCE.register(false, (dispatcher) -> {
+			RootCommandNode<ServerCommandSource> rootCommandNode = dispatcher.getRoot();
+
+			LiteralCommandNode<ServerCommandSource> stripCommandNode = CommandManager.literal("strip")
+				.executes(new StripCommand())
+				.requires((source) -> source.hasPermissionLevel(3))
+				.build();
+
+			rootCommandNode.addChild(stripCommandNode);
+		});
+
+		File file = new File(FabricLoader.getInstance().getConfigDirectory(), "CottonResources.json5");
+		if (file.exists()) {
+			CONFIG = loadConfig();
+			saveConfig(CONFIG);
+		} else {
+			saveConfig(CONFIG);
+		}
+	}
+
+	private static void setupBiomeGenerators() {
+		for (Biome biome : Registry.BIOME) {
+			setupBiomeGenerator(biome);
+		}
+	}
+
+	private static void setupBiomeGenerator(Biome biome) {
+		biome.addFeature(GenerationStep.Feature.UNDERGROUND_ORES,
+			CottonOreFeature.COTTON_ORE
+				.configure(FeatureConfig.DEFAULT)
+				.createDecoratedFeature(
+					Decorator.COUNT_RANGE.configure(new RangeDecoratorConfig(1, 0, 0, 256)
+					)
+				));
+	}
+
+	private static MetalResourceType builtinMetal(String id, Supplier<Block> oreSupplier, String... extraAffixes) {
+		MetalResourceType result = new MetalResourceType(id);
+		if (oreSupplier != null) {
+			result.withOreSupplier(oreSupplier);
+			result.withBlockAffix("nether_ore", oreSupplier);
+			result.withBlockAffix("end_ore", oreSupplier);
+		}
+
+		if (extraAffixes.length > 0) {
+			result.withItemAffixes(extraAffixes);
+		}
+
+		BUILTINS.put(id, result);
+		return result;
+	}
+
+	private static void builtinGem(String id, Supplier<Block> oreSupplier, String... extraAffixes) {
+		GemResourceType result = new GemResourceType(id).withOreSupplier(oreSupplier);
+		if (extraAffixes.length > 0) {
+			result.withItemAffixes(extraAffixes);
+		}
+
+		BUILTINS.put(id, result);
+	}
+
+	private static RadioactiveResourceType builtinRadioactive(String id, Supplier<Block> oreSupplier, String... extraAffixes) {
+		RadioactiveResourceType result = new RadioactiveResourceType(id);
+		if (oreSupplier != null) result.withOreSupplier(oreSupplier);
+
+		if (extraAffixes.length > 0) {
+			result.withItemAffixes(extraAffixes);
+		}
+
+		BUILTINS.put(id, result);
+		return result;
+	}
+
+	private static void builtinItem(String id, String... extraAffixes) {
+		GenericResourceType result = new GenericResourceType(id).withItemAffixes(extraAffixes);
+		if (extraAffixes.length == 0) {
+			result.withItemAffixes(""); //This is just a base type with no affixes, like "mercury".
+		}
+		BUILTINS.put(id, result);
+	}
+
+
+	public static CottonResourcesConfig loadConfig() {
+		File file = new File(FabricLoader.getInstance().getConfigDirectory(), "CottonResources.json5");
+
+		Jankson jankson = JanksonFactory.builder()
+			.registerTypeAdapter(OreGenerationSettings.class, OreGenerationSettings::deserialize)
+			.build();
+		try {
+			JsonObject json = jankson.load(file);
+			System.out.println("Loading: " + json);
+			CottonResourcesConfig loading = jankson.fromJson(json, CottonResourcesConfig.class);
+			System.out.println("Loaded Map: " + loading.generators);
+			//Manually reload oregen because BiomeSpec and DimensionSpec can be fussy
+
+			JsonObject oregen = json.getObject("generators");
+			if (oregen != null) {
+				System.out.println("RELOADING " + oregen.size() + " entries");
+				for (Map.Entry<String, JsonElement> entry : oregen.entrySet()) {
+					if (entry.getValue() instanceof JsonObject) {
+						OreGenerationSettings settings = OreGenerationSettings.deserialize((JsonObject) entry.getValue());
+						loading.generators.put(entry.getKey(), settings);
+					}
 				}
+			}
+
+			System.out.println("RELOADED Map: " + loading.generators);
+
+			return loading;
+		} catch (IOException | SyntaxError e) {
+			e.printStackTrace();
 		}
 
-		private static void setupBiomeGenerator(Biome biome) {
-				biome.addFeature(GenerationStep.Feature.UNDERGROUND_ORES,
-					CottonOreFeature.COTTON_ORE
-						.configure(FeatureConfig.DEFAULT)
-						.createDecoratedFeature(
-							Decorator.COUNT_RANGE.configure(new RangeDecoratorConfig(1, 0, 0, 256)
-							)
-						));
+		return new CottonResourcesConfig();
+	}
+
+	public static void saveConfig(CottonResourcesConfig config) {
+		File file = new File(FabricLoader.getInstance().getConfigDirectory(), "CottonResources.json5");
+
+		Jankson jankson = JanksonFactory.builder()
+			.registerSerializer(BiomeSpec.class, (spec, marshaller) -> TaggableSpec.serialize(spec))
+			.registerSerializer(DimensionSpec.class, (spec, marshaller) -> TaggableSpec.serialize(spec))
+			.build();
+
+		JsonElement json = jankson.toJson(config);
+
+		try (FileOutputStream out = new FileOutputStream(file, false)) {
+			out.write(json.toJson(JsonGrammar.JSON5).getBytes(StandardCharsets.UTF_8));
+		} catch (IOException ex) {
+			LOGGER.error("Could not write config", ex);
 		}
+	}
 
-		private static MetalResourceType builtinMetal(String id, Supplier<Block> oreSupplier, String... extraAffixes) {
-				MetalResourceType result = new MetalResourceType(id);
-				if (oreSupplier != null) {
-						result.withOreSupplier(oreSupplier);
-						result.withBlockAffix("nether_ore", oreSupplier);
-						result.withBlockAffix("end_ore", oreSupplier);
-				}
-
-				if (extraAffixes.length > 0) {
-						result.withItemAffixes(extraAffixes);
-				}
-
-				BUILTINS.put(id, result);
-				return result;
-		}
-
-		private static void builtinGem(String id, Supplier<Block> oreSupplier, String... extraAffixes) {
-				GemResourceType result = new GemResourceType(id).withOreSupplier(oreSupplier);
-				if (extraAffixes.length > 0) {
-						result.withItemAffixes(extraAffixes);
-				}
-
-				BUILTINS.put(id, result);
-		}
-
-		private static RadioactiveResourceType builtinRadioactive(String id, Supplier<Block> oreSupplier, String... extraAffixes) {
-				RadioactiveResourceType result = new RadioactiveResourceType(id);
-				if (oreSupplier != null) result.withOreSupplier(oreSupplier);
-
-				if (extraAffixes.length > 0) {
-						result.withItemAffixes(extraAffixes);
-				}
-
-				BUILTINS.put(id, result);
-				return result;
-		}
-
-		private static void builtinItem(String id, String... extraAffixes) {
-				GenericResourceType result = new GenericResourceType(id).withItemAffixes(extraAffixes);
-				if (extraAffixes.length == 0) {
-						result.withItemAffixes(""); //This is just a base type with no affixes, like "mercury".
-				}
-				BUILTINS.put(id, result);
-		}
-
-
-		public static CottonResourcesConfig loadConfig() {
-				File file = new File(FabricLoader.getInstance().getConfigDirectory(), "CottonResources.json5");
-
-				Jankson jankson = JanksonFactory.builder()
-					.registerTypeAdapter(OreGenerationSettings.class, OreGenerationSettings::deserialize)
-					.build();
-				try {
-						JsonObject json = jankson.load(file);
-						System.out.println("Loading: " + json);
-						CottonResourcesConfig loading = jankson.fromJson(json, CottonResourcesConfig.class);
-						System.out.println("Loaded Map: " + loading.generators);
-						//Manually reload oregen because BiomeSpec and DimensionSpec can be fussy
-
-						JsonObject oregen = json.getObject("generators");
-						if (oregen != null) {
-								System.out.println("RELOADING " + oregen.size() + " entries");
-								for (Map.Entry<String, JsonElement> entry : oregen.entrySet()) {
-										if (entry.getValue() instanceof JsonObject) {
-												OreGenerationSettings settings = OreGenerationSettings.deserialize((JsonObject) entry.getValue());
-												loading.generators.put(entry.getKey(), settings);
-										}
-								}
-						}
-
-						System.out.println("RELOADED Map: " + loading.generators);
-
-						return loading;
-				} catch (IOException | SyntaxError e) {
-						e.printStackTrace();
-				}
-
-				return new CottonResourcesConfig();
-		}
-
-		public static void saveConfig(CottonResourcesConfig config) {
-				File file = new File(FabricLoader.getInstance().getConfigDirectory(), "CottonResources.json5");
-
-				Jankson jankson = JanksonFactory.builder()
-					.registerSerializer(BiomeSpec.class, (spec, marshaller) -> TaggableSpec.serialize(spec))
-					.registerSerializer(DimensionSpec.class, (spec, marshaller) -> TaggableSpec.serialize(spec))
-					.build();
-
-				JsonElement json = jankson.toJson(config);
-
-				try (FileOutputStream out = new FileOutputStream(file, false)) {
-						out.write(json.toJson(JsonGrammar.JSON5).getBytes(StandardCharsets.UTF_8));
-				} catch (IOException ex) {
-						LOGGER.error("Could not write config", ex);
-				}
-		}
-
-		@SafeVarargs
-		public static <T> T[] mergeArrays(T[] a, T... b) {
-				T[] result = Arrays.copyOf(a, a.length + b.length);
-				System.arraycopy(b, 0, result, a.length, b.length);
-				return result;
-		}
+	@SafeVarargs
+	public static <T> T[] mergeArrays(T[] a, T... b) {
+		T[] result = Arrays.copyOf(a, a.length + b.length);
+		System.arraycopy(b, 0, result, a.length, b.length);
+		return result;
+	}
 }
