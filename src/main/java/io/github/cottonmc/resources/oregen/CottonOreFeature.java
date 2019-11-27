@@ -1,10 +1,12 @@
 package io.github.cottonmc.resources.oregen;
 
+import io.github.cottonmc.resources.CottonResources;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.Tag;
+import net.minecraft.tag.TagContainer;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
@@ -30,12 +32,6 @@ public class CottonOreFeature extends Feature<DefaultFeatureConfig> {
 	public static Clump[] SPHERES = {
 			Clump.of(1), Clump.of(2), Clump.of(3), Clump.of(4), Clump.of(5), Clump.of(6), Clump.of(7), Clump.of(8), Clump.of(9)
 	};
-	
-	public static final Predicate<Block> NATURAL_STONE = (it)->
-			it==Blocks.STONE    ||
-			it==Blocks.GRANITE  ||
-			it==Blocks.DIORITE  ||
-			it==Blocks.ANDESITE;
 
 	public CottonOreFeature() {
 		super(DefaultFeatureConfig::deserialize);
@@ -50,7 +46,7 @@ public class CottonOreFeature extends Feature<DefaultFeatureConfig> {
 		BiomeArray biomeArray = toGenerateIn.getBiomeArray();
 
 		if (biomeArray==null) {
-			System.err.println("BiomeArray was null");
+			System.err.println("BiomeArray was null during generation.");
 			return false; // I have no idea why this would be null but in the context of generating a check I am pretty sure the game would have this already.
 		}
 
@@ -213,7 +209,7 @@ public class CottonOreFeature extends Feature<DefaultFeatureConfig> {
 
 			return false; //There are replacements defined for this resource, but none could be applied.
 		} else {
-			if (!NATURAL_STONE.test(toReplace.getBlock())) return false; //Fixes surface copper
+			if (!BlockTags.getContainer().get(new Identifier(CottonResources.COMMON, "natural_stone")).contains(toReplace.getBlock())) return false; //Fixes surface copper
 
 			BlockState replacement = states[rand.nextInt(states.length)];
 			world.setBlockState(pos, replacement, 3);
