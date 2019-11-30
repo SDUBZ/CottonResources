@@ -6,14 +6,12 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.Tag;
-import net.minecraft.tag.TagContainer;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeArray;
-import net.minecraft.world.biome.StoneShoreBiome;
+import net.minecraft.world.biome.source.BiomeArray;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.chunk.ChunkGeneratorConfig;
@@ -24,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.function.Predicate;
 
 public class CottonOreFeature extends Feature<DefaultFeatureConfig> {
 	public static final CottonOreFeature COTTON_ORE = Registry.register(Registry.FEATURE, "cotton:ore", new CottonOreFeature());
@@ -47,10 +44,10 @@ public class CottonOreFeature extends Feature<DefaultFeatureConfig> {
 
 		if (biomeArray==null) {
 			System.err.println("BiomeArray was null during generation.");
-			return false; // I have no idea why this would be null but in the context of generating a check I am pretty sure the game would have this already.
+			return false; // I have no idea why this would be null but in the context of generating a chunk I am pretty sure the game would have this already.
 		}
 
-		Biome biome = biomeArray.getStoredBiome(pos.getX(), pos.getY(), pos.getZ());
+		Biome biome = biomeArray.getBiomeForNoiseGen(pos.getX(), pos.getY(), pos.getZ());
 		//System.out.println("Generating into "+toGenerateIn.getPos()+" <- "+config.ores);
 		for(String s : config.ores) {
 			OreGenerationSettings settings = config.generators.get(s);

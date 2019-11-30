@@ -21,7 +21,7 @@
 		},
 
 		"copper": {
-			"dimensions": [ "#overworlds" ],
+			"dimensions": [ { tag: "c:overworlds"} ],
 			"biomes": [ "*" ],
 
 			"ore_block": "c:copper_ore",

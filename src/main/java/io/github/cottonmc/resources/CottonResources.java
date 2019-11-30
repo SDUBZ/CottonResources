@@ -3,6 +3,7 @@ package io.github.cottonmc.resources;
 import com.mojang.brigadier.tree.RootCommandNode;
 import io.github.cottonmc.jankson.JanksonFactory;
 import io.github.cottonmc.resources.command.StripCommand;
+import io.github.cottonmc.resources.command.TagTestCommand;
 import io.github.cottonmc.resources.config.CottonResourcesConfig;
 import io.github.cottonmc.resources.oregen.BiomeSpec;
 import io.github.cottonmc.resources.oregen.CottonOreFeature;
@@ -10,6 +11,8 @@ import io.github.cottonmc.resources.oregen.DimensionSpec;
 import io.github.cottonmc.resources.oregen.OreGenerationSettings;
 import io.github.cottonmc.resources.oregen.OregenResourceListener;
 import io.github.cottonmc.resources.oregen.TaggableSpec;
+import io.github.cottonmc.resources.tag.BiomeTags;
+import io.github.cottonmc.resources.tag.DimensionTypeTags;
 import io.github.cottonmc.resources.tag.WorldTagReloadListener;
 import io.github.cottonmc.resources.type.GemResourceType;
 import io.github.cottonmc.resources.type.GenericResourceType;
@@ -73,6 +76,9 @@ public class CottonResources implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+
+		DimensionTypeTags.getContainer(); // Load the TagContainers
+		BiomeTags.getContainer(); // Load the TagContainers
 
 		METAL_STEP_SOUND = Registry.register(Registry.SOUND_EVENT, "block.cotton-resources.metal.step", new SoundEvent(new Identifier("c:block.cotton-resources.metal.step")));
 		METAL_SOUND_GROUP = new BlockSoundGroup(1.0F, 1.5F, SoundEvents.BLOCK_METAL_BREAK, METAL_STEP_SOUND, SoundEvents.BLOCK_METAL_PLACE, SoundEvents.BLOCK_METAL_HIT, SoundEvents.BLOCK_METAL_FALL);
@@ -143,6 +149,23 @@ public class CottonResources implements ModInitializer {
 				.build();
 
 			rootCommandNode.addChild(stripCommandNode);
+
+			LiteralCommandNode<ServerCommandSource> tags = CommandManager.literal("taginfo").build();
+
+			LiteralCommandNode<ServerCommandSource> dimensions = CommandManager.literal("dimensions")
+				.requires(s -> s.hasPermissionLevel(3))
+				.executes(TagTestCommand::dimensions)
+				.build();
+
+			LiteralCommandNode<ServerCommandSource> biomes = CommandManager.literal("biomes")
+				.requires(s -> s.hasPermissionLevel(3))
+				.executes(TagTestCommand::biomes)
+				.build();
+
+			tags.addChild(dimensions);
+			tags.addChild(biomes);
+
+			rootCommandNode.addChild(tags);
 		});
 
 		File file = new File(FabricLoader.getInstance().getConfigDirectory(), "CottonResources.json5");

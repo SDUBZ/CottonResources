@@ -3,6 +3,7 @@ package io.github.cottonmc.resources.oregen;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
 
 import blue.endless.jankson.JsonElement;
