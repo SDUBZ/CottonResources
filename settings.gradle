@@ -1,5 +1,6 @@
 pluginManagement {
     repositories {
+	    mavenCentral(); //for Jankson
         jcenter()
         maven {
             name = 'Fabric'
