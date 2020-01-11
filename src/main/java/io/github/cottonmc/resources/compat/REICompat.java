@@ -4,8 +4,6 @@ import com.google.common.collect.ImmutableSet;
 import io.github.cottonmc.resources.CottonResources;
 import io.github.cottonmc.resources.oregen.OregenResourceListener;
 import io.github.cottonmc.resources.type.ResourceType;
-import me.shedaniel.rei.api.Entry;
-import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.util.version.VersionParsingException;

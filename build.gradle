@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '0.2.4-SNAPSHOT'
+    id 'fabric-loom' version '0.2.6-SNAPSHOT'
     id 'maven-publish'
     id 'com.jfrog.artifactory' version '4.9.0'
 }
@@ -14,7 +14,7 @@ group = maven_group
 repositories {
     mavenLocal();
     maven { url "http://server.bbkr.space:8081/artifactory/libs-release/" }
-    maven { url "https://minecraft.curseforge.com/api/maven" } //resolves REI
+    maven { url "https://minecraft.curseforge.com/api/maven" } //resolves REI 
 }
 
 dependencies {
@@ -26,7 +26,7 @@ dependencies {
     modCompile "io.github.cottonmc:Jankson:${jankson_version}"
     include "io.github.cottonmc:Jankson:${jankson_version}"
 
-    modImplementation ("me.shedaniel:RoughlyEnoughItems:3.0-pre+build.1") {
+    modImplementation ("me.shedaniel:RoughlyEnoughItems:3.2.33") {
         exclude(group: "blue.endless", module: "jankson")
         exclude(group: "io.github.prospector.modmenu", module: "ModMenu")
     }
