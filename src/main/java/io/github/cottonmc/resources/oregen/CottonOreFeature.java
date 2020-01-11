@@ -1,5 +1,6 @@
 package io.github.cottonmc.resources.oregen;
 
+import io.github.cottonmc.resources.CottonResources;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -10,6 +11,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.source.BiomeArray;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.chunk.ChunkGeneratorConfig;
@@ -20,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.function.Predicate;
 
 public class CottonOreFeature extends Feature<DefaultFeatureConfig> {
 	public static final CottonOreFeature COTTON_ORE = Registry.register(Registry.FEATURE, "cotton:ore", new CottonOreFeature());
@@ -28,12 +29,6 @@ public class CottonOreFeature extends Feature<DefaultFeatureConfig> {
 	public static Clump[] SPHERES = {
 			Clump.of(1), Clump.of(2), Clump.of(3), Clump.of(4), Clump.of(5), Clump.of(6), Clump.of(7), Clump.of(8), Clump.of(9)
 	};
-	
-	public static final Predicate<Block> NATURAL_STONE = (it)->
-			it==Blocks.STONE    ||
-			it==Blocks.GRANITE  ||
-			it==Blocks.DIORITE  ||
-			it==Blocks.ANDESITE;
 
 	public CottonOreFeature() {
 		super(DefaultFeatureConfig::deserialize);
@@ -43,18 +38,25 @@ public class CottonOreFeature extends Feature<DefaultFeatureConfig> {
 		OreVoteConfig config = OregenResourceListener.getConfig();
 		if (config.ores.isEmpty()) return true; // We didn't generate anything, but yes, don't retry.
 		
-		
 		Chunk toGenerateIn = world.getChunk(pos);
-		Biome biome = toGenerateIn.getBiome(pos);
+
+		BiomeArray biomeArray = toGenerateIn.getBiomeArray();
+
+		if (biomeArray==null) {
+			System.err.println("BiomeArray was null during generation.");
+			return false; // I have no idea why this would be null but in the context of generating a chunk I am pretty sure the game would have this already.
+		}
+
+		Biome biome = biomeArray.getBiomeForNoiseGen(pos.getX(), pos.getY(), pos.getZ());
 		//System.out.println("Generating into "+toGenerateIn.getPos()+" <- "+config.ores);
 		for(String s : config.ores) {
 			OreGenerationSettings settings = config.generators.get(s);
 			if (settings==null) continue;
-			
+
 			if (settings.dimensions.test(world.getDimension()) && settings.biomes.test(biome)) {
-			
 				//For now, spit debug info
 				if (settings.ores.isEmpty()) {
+					//System.out.println("Empty ore settings");
 					continue;
 				}
 				int clusters = settings.cluster_count;
@@ -160,7 +162,7 @@ public class CottonOreFeature extends Feature<DefaultFeatureConfig> {
 	protected int generateVeinPartGaussianClump(String resourceName, IWorld world, int x, int y, int z, int clumpSize, int radius, Set<BlockState> states, int density, Random rand) {
 		int radIndex = radius-1;
 		Clump clump = (radIndex<SPHERES.length) ? SPHERES[radIndex].copy() : Clump.of(radius);
-		
+
 		//int rad2 = radius * radius;
 		BlockState[] blocks = states.toArray(new BlockState[states.size()]);
 		int replaced = 0;
@@ -177,7 +179,7 @@ public class CottonOreFeature extends Feature<DefaultFeatureConfig> {
 	}
 	
 	/**
-	 * 
+	 *
 	 * @param world
 	 * @param x
 	 * @param y
@@ -190,7 +192,7 @@ public class CottonOreFeature extends Feature<DefaultFeatureConfig> {
 		BlockPos pos = new BlockPos(x, y, z);
 		BlockState toReplace = world.getBlockState(pos);
 		HashMap<String, String> replacementSpecs = OregenResourceListener.getConfig().replacements.get(resource);
-		if (replacementSpecs!=null) {
+		if (replacementSpecs != null) {
 			//System.out.println("Activating replacementSpecs for resource "+resource);
 			for(Map.Entry<String, String> entry : replacementSpecs.entrySet()) {
 				if (test(toReplace.getBlock(), entry.getKey())) {
@@ -201,10 +203,11 @@ public class CottonOreFeature extends Feature<DefaultFeatureConfig> {
 					return true;
 				}
 			}
+
 			return false; //There are replacements defined for this resource, but none could be applied.
 		} else {
-			if (!NATURAL_STONE.test(toReplace.getBlock())) return false; //Fixes surface copper
-			
+			if (!BlockTags.getContainer().get(new Identifier(CottonResources.COMMON, "natural_stone")).contains(toReplace.getBlock())) return false; //Fixes surface copper
+
 			BlockState replacement = states[rand.nextInt(states.length)];
 			world.setBlockState(pos, replacement, 3);
 			return true;

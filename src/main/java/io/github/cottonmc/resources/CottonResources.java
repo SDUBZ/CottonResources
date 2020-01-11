@@ -1,7 +1,9 @@
 package io.github.cottonmc.resources;
 
+import com.mojang.brigadier.tree.RootCommandNode;
 import io.github.cottonmc.jankson.JanksonFactory;
 import io.github.cottonmc.resources.command.StripCommand;
+import io.github.cottonmc.resources.command.TagTestCommand;
 import io.github.cottonmc.resources.config.CottonResourcesConfig;
 import io.github.cottonmc.resources.oregen.BiomeSpec;
 import io.github.cottonmc.resources.oregen.CottonOreFeature;
@@ -9,6 +11,8 @@ import io.github.cottonmc.resources.oregen.DimensionSpec;
 import io.github.cottonmc.resources.oregen.OreGenerationSettings;
 import io.github.cottonmc.resources.oregen.OregenResourceListener;
 import io.github.cottonmc.resources.oregen.TaggableSpec;
+import io.github.cottonmc.resources.tag.BiomeTags;
+import io.github.cottonmc.resources.tag.DimensionTypeTags;
 import io.github.cottonmc.resources.tag.WorldTagReloadListener;
 import io.github.cottonmc.resources.type.GemResourceType;
 import io.github.cottonmc.resources.type.GenericResourceType;
@@ -64,19 +68,21 @@ public class CottonResources implements ModInitializer {
 	public static CottonResourcesConfig CONFIG = new CottonResourcesConfig(); //ConfigManager.loadConfig(CottonResourcesConfig.class);
 	private static final String[] MACHINE_AFFIXES = new String[]{"gear", "plate"};
 	public static final Map<String, ResourceType> BUILTINS = new HashMap<>();
-	
-	public static ItemGroup ITEM_GROUP = FabricItemGroupBuilder.build(new Identifier(MODID, "resources"), ()->new ItemStack(BUILTINS.get("copper").getItem("gear")));
-	
+
+	public static ItemGroup ITEM_GROUP = FabricItemGroupBuilder.build(new Identifier(MODID, "resources"), () -> new ItemStack(BUILTINS.get("copper").getItem("gear")));
+
 	public static SoundEvent METAL_STEP_SOUND;
 	public static BlockSoundGroup METAL_SOUND_GROUP;
-	
+
 	@Override
 	public void onInitialize() {
-		
-		
-		METAL_STEP_SOUND = (SoundEvent)Registry.register(Registry.SOUND_EVENT, "block.cotton-resources.metal.step", new SoundEvent(new Identifier("c:block.cotton-resources.metal.step")));
+
+		DimensionTypeTags.getContainer(); // Load the TagContainers
+		BiomeTags.getContainer(); // Load the TagContainers
+
+		METAL_STEP_SOUND = Registry.register(Registry.SOUND_EVENT, "block.cotton-resources.metal.step", new SoundEvent(new Identifier("c:block.cotton-resources.metal.step")));
 		METAL_SOUND_GROUP = new BlockSoundGroup(1.0F, 1.5F, SoundEvents.BLOCK_METAL_BREAK, METAL_STEP_SOUND, SoundEvents.BLOCK_METAL_PLACE, SoundEvents.BLOCK_METAL_HIT, SoundEvents.BLOCK_METAL_FALL);
-		
+
 		builtinMetal("copper", BlockSuppliers.STONE_TIER_ORE, MACHINE_AFFIXES);
 		builtinMetal("silver", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
 		builtinMetal("lead", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
@@ -84,7 +90,7 @@ public class CottonResources implements ModInitializer {
 		builtinMetal("aluminum", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
 		MetalResourceType cobalt = builtinMetal("cobalt", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
 		//cobalt.withBlockAffix("nether_ore", BlockSuppliers.IRON_TIER_ORE);
-		
+
 		builtinMetal("tin", BlockSuppliers.STONE_TIER_ORE, MACHINE_AFFIXES);
 		builtinMetal("titanium", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
 		builtinMetal("tungsten", BlockSuppliers.IRON_TIER_ORE, MACHINE_AFFIXES);
@@ -109,9 +115,9 @@ public class CottonResources implements ModInitializer {
 
 		//These might get rods or molten capsules. They'd just need to be added to the end.
 		RadioactiveResourceType uranium = builtinRadioactive("uranium", null, "gear", "plate", "ingot", "nugget");
-		uranium.withBlockAffix("ore", BlockSuppliers.DIAMOND_TIER_ORE);
-		uranium.withBlockAffix("nether_ore", BlockSuppliers.DIAMOND_TIER_ORE);
-		uranium.withBlockAffix("end_ore", BlockSuppliers.DIAMOND_TIER_ORE);
+		uranium.withBlockAffix("ore", BlockSuppliers.RADIOACTIVE_DIAMOND_TIER_ORE);
+		uranium.withBlockAffix("nether_ore", BlockSuppliers.RADIOACTIVE_DIAMOND_TIER_ORE);
+		uranium.withBlockAffix("end_ore", BlockSuppliers.RADIOACTIVE_DIAMOND_TIER_ORE);
 		builtinRadioactive("plutonium", null, "gear", "plate", "ingot", "nugget");
 		builtinRadioactive("thorium", null, "gear", "plate", "ingot", "nugget");
 
@@ -127,23 +133,42 @@ public class CottonResources implements ModInitializer {
 		for (ResourceType resource : BUILTINS.values()) {
 			resource.registerAll();
 		}
-		
+
 		setupBiomeGenerators(); //add cotton-resources ores to all current biomes
-		RegistryEntryAddedCallback.event(Registry.BIOME).register((id, ident, biome)->setupBiomeGenerator(biome)); //Add cotton-resources ores to any later biomes that appear
-		
+		RegistryEntryAddedCallback.event(Registry.BIOME).register((id, ident, biome) -> setupBiomeGenerator(biome)); //Add cotton-resources ores to any later biomes that appear
+
 		ResourceManagerHelper.get(net.minecraft.resource.ResourceType.SERVER_DATA).registerReloadListener(new OregenResourceListener());
 		ResourceManagerHelper.get(net.minecraft.resource.ResourceType.SERVER_DATA).registerReloadListener(new WorldTagReloadListener());
-		
-		CommandRegistry.INSTANCE.register(false, (dispatcher)->{
+
+		CommandRegistry.INSTANCE.register(false, (dispatcher) -> {
+			RootCommandNode<ServerCommandSource> rootCommandNode = dispatcher.getRoot();
+
 			LiteralCommandNode<ServerCommandSource> stripCommandNode = CommandManager.literal("strip")
-					.executes(new StripCommand())
-					.requires((source)->source.hasPermissionLevel(3))
-					.build();
-			
-			dispatcher.getRoot().addChild(stripCommandNode);
+				.executes(new StripCommand())
+				.requires((source) -> source.hasPermissionLevel(3))
+				.build();
+
+			rootCommandNode.addChild(stripCommandNode);
+
+			LiteralCommandNode<ServerCommandSource> tags = CommandManager.literal("taginfo").build();
+
+			LiteralCommandNode<ServerCommandSource> dimensions = CommandManager.literal("dimensions")
+				.requires(s -> s.hasPermissionLevel(3))
+				.executes(TagTestCommand::dimensions)
+				.build();
+
+			LiteralCommandNode<ServerCommandSource> biomes = CommandManager.literal("biomes")
+				.requires(s -> s.hasPermissionLevel(3))
+				.executes(TagTestCommand::biomes)
+				.build();
+
+			tags.addChild(dimensions);
+			tags.addChild(biomes);
+
+			rootCommandNode.addChild(tags);
 		});
-		
-		File file = new File(FabricLoader.getInstance().getConfigDirectory(),"CottonResources.json5");
+
+		File file = new File(FabricLoader.getInstance().getConfigDirectory(), "CottonResources.json5");
 		if (file.exists()) {
 			CONFIG = loadConfig();
 			saveConfig(CONFIG);
@@ -151,22 +176,21 @@ public class CottonResources implements ModInitializer {
 			saveConfig(CONFIG);
 		}
 	}
-	
+
 	private static void setupBiomeGenerators() {
 		for (Biome biome : Registry.BIOME) {
 			setupBiomeGenerator(biome);
 		}
 	}
-	
+
 	private static void setupBiomeGenerator(Biome biome) {
 		biome.addFeature(GenerationStep.Feature.UNDERGROUND_ORES,
-			Biome.configureFeature(
-				CottonOreFeature.COTTON_ORE,
-				FeatureConfig.DEFAULT,
-				Decorator.COUNT_RANGE,
-				new RangeDecoratorConfig(1, 0, 0, 256)
-			)
-		);
+			CottonOreFeature.COTTON_ORE
+				.configure(FeatureConfig.DEFAULT)
+				.createDecoratedFeature(
+					Decorator.COUNT_RANGE.configure(new RangeDecoratorConfig(1, 0, 0, 256)
+					)
+				));
 	}
 
 	private static MetalResourceType builtinMetal(String id, Supplier<Block> oreSupplier, String... extraAffixes) {
@@ -213,62 +237,62 @@ public class CottonResources implements ModInitializer {
 		}
 		BUILTINS.put(id, result);
 	}
-	
-	
+
+
 	public static CottonResourcesConfig loadConfig() {
-		File file = new File(FabricLoader.getInstance().getConfigDirectory(),"CottonResources.json5");
-		
+		File file = new File(FabricLoader.getInstance().getConfigDirectory(), "CottonResources.json5");
+
 		Jankson jankson = JanksonFactory.builder()
-				.registerTypeAdapter(OreGenerationSettings.class, OreGenerationSettings::deserialize)
-				.build();
+			.registerTypeAdapter(OreGenerationSettings.class, OreGenerationSettings::deserialize)
+			.build();
 		try {
 			JsonObject json = jankson.load(file);
-			System.out.println("Loading: "+json);
+			System.out.println("Loading: " + json);
 			CottonResourcesConfig loading = jankson.fromJson(json, CottonResourcesConfig.class);
-			System.out.println("Loaded Map: "+loading.generators);
+			System.out.println("Loaded Map: " + loading.generators);
 			//Manually reload oregen because BiomeSpec and DimensionSpec can be fussy
-			
+
 			JsonObject oregen = json.getObject("generators");
-			if (oregen!=null) {
-				System.out.println("RELOADING "+oregen.size()+" entries");
-				for(Map.Entry<String, JsonElement> entry : oregen.entrySet()) {
+			if (oregen != null) {
+				System.out.println("RELOADING " + oregen.size() + " entries");
+				for (Map.Entry<String, JsonElement> entry : oregen.entrySet()) {
 					if (entry.getValue() instanceof JsonObject) {
-						OreGenerationSettings settings = OreGenerationSettings.deserialize((JsonObject)entry.getValue());
+						OreGenerationSettings settings = OreGenerationSettings.deserialize((JsonObject) entry.getValue());
 						loading.generators.put(entry.getKey(), settings);
 					}
 				}
 			}
-			
-			System.out.println("RELOADED Map: "+loading.generators);
-			
+
+			System.out.println("RELOADED Map: " + loading.generators);
+
 			return loading;
 		} catch (IOException | SyntaxError e) {
 			e.printStackTrace();
 		}
-		
+
 		return new CottonResourcesConfig();
 	}
 
 	public static void saveConfig(CottonResourcesConfig config) {
-		File file = new File(FabricLoader.getInstance().getConfigDirectory(),"CottonResources.json5");
-		
+		File file = new File(FabricLoader.getInstance().getConfigDirectory(), "CottonResources.json5");
+
 		Jankson jankson = JanksonFactory.builder()
-				.registerSerializer(BiomeSpec.class, (spec, marshaller)->TaggableSpec.serialize(spec))
-				.registerSerializer(DimensionSpec.class, (spec, marshaller)->TaggableSpec.serialize(spec))
-				.build();
-		
+			.registerSerializer(BiomeSpec.class, (spec, marshaller) -> TaggableSpec.serialize(spec))
+			.registerSerializer(DimensionSpec.class, (spec, marshaller) -> TaggableSpec.serialize(spec))
+			.build();
+
 		JsonElement json = jankson.toJson(config);
-		
+
 		try (FileOutputStream out = new FileOutputStream(file, false)) {
 			out.write(json.toJson(JsonGrammar.JSON5).getBytes(StandardCharsets.UTF_8));
 		} catch (IOException ex) {
 			LOGGER.error("Could not write config", ex);
 		}
 	}
-	
+
 	@SafeVarargs
 	public static <T> T[] mergeArrays(T[] a, T... b) {
-		T[] result = Arrays.copyOf(a, a.length+b.length);
+		T[] result = Arrays.copyOf(a, a.length + b.length);
 		System.arraycopy(b, 0, result, a.length, b.length);
 		return result;
 	}

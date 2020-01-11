@@ -14,14 +14,26 @@ public class BlockSuppliers {
             .hardness(3.0f)
             .resistance(3.0f)
             .build());
-    /** A resilient metal ore supplier, similar to the properties of redstone ore. */
-    public static final Supplier<Block> IRON_TIER_ORE = () -> new LayeredOreBlock(FabricBlockSettings.copy(Blocks.REDSTONE_ORE)
+    /** A resilient metal ore supplier, requires an iron like tool level to collect. */
+    public static final Supplier<Block> IRON_TIER_ORE = () -> new LayeredOreBlock(FabricBlockSettings.copy(Blocks.DIAMOND_ORE)
+            .hardness(3.0f)
+            .resistance(3.0f)
+            //.breakByTool(FabricToolTags.PICKAXES, 2)
+            .build());
+    /** A resilient metal ore supplier, similar to the properties of redstone ore where it can glow. May be used in future for other ores*/
+    public static final Supplier<Block> LIGHTABLE_IRON_TIER_ORE = () -> new LayeredOreBlock(FabricBlockSettings.copy(Blocks.REDSTONE_ORE)
             .hardness(3.0f)
             .resistance(3.0f)
             //.breakByTool(FabricToolTags.PICKAXES, 2)
             .build());
     /** An extremely resilient metal ore supplier, only harvestable by diamond or better pickaxes. */
     public static final Supplier<Block> DIAMOND_TIER_ORE = () -> new LayeredOreBlock(FabricBlockSettings.of(Material.STONE)
+            .hardness(3.0f)
+            .resistance(3.0f)
+            .breakByTool(FabricToolTags.PICKAXES, 3)
+            .build());
+    /** An extremely resilient metal ore supplier, only harvestable by diamond or better pickaxes. */
+    public static final Supplier<Block> RADIOACTIVE_DIAMOND_TIER_ORE = () -> new GlowingLayeredOreBlock(FabricBlockSettings.copy(Blocks.REDSTONE_ORE)
             .hardness(3.0f)
             .resistance(3.0f)
             .breakByTool(FabricToolTags.PICKAXES, 3)

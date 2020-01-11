@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import io.github.cottonmc.resources.CottonResources;
 import io.github.cottonmc.resources.oregen.OregenResourceListener;
 import io.github.cottonmc.resources.type.ResourceType;
-import me.shedaniel.rei.api.Entry;
+import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import net.fabricmc.loader.api.SemanticVersion;
@@ -32,10 +32,10 @@ public class REICompat implements REIPluginV0 {
 	@Override
 	public void registerEntries(EntryRegistry entryRegistry) {
 		CottonResources.LOGGER.info("Configuring resource visibility");
-		recheckItemHiding(entryRegistry.getModifiableEntryList());
+		recheckItemHiding(entryRegistry.getStacksList());
 	}
 	
-	public void recheckItemHiding(List<Entry> list) {
+	public void recheckItemHiding(List<EntryStack> list) {
 		for (ResourceType rsrc : CottonResources.BUILTINS.values()) {
 			if (IMMUNE_TO_HIDING.contains(rsrc.getBaseResource())) continue;
 			
@@ -51,8 +51,8 @@ public class REICompat implements REIPluginV0 {
 				
 				boolean add = enabled;
 				for(int i=0; i<list.size(); i++) {
-					Entry entry = list.get(i);
-					if (entry.getEntryType() == Entry.Type.ITEM) {
+					EntryStack entry = list.get(i);
+					if (entry.getType() == EntryStack.Type.ITEM) {
 						ItemStack listItem = entry.getItemStack();
 						if (listItem.getItem() == item) {
 							add = false;
